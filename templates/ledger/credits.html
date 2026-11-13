@@ -1,0 +1,53 @@
+
+{% extends "ledger/base.html" %}
+{% block title %}Credit Records | Smart Kirana Credit Manager{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">TRANSACTION MANAGEMENT</span>
+        <h1>Credit Records</h1>
+        <p>Review recorded credit transactions and their due dates.</p>
+    </div>
+
+    <a href="{% url 'credit_create' %}" class="btn btn-primary">
+        + Add Credit
+    </a>
+</div>
+
+<section class="content-card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Bill No.</th>
+                    <th>Customer</th>
+                    <th>Note / details</th>
+                    <th>Amount</th>
+                    <th>Date recorded</th>
+                    <th>Due date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr>
+                    <td>{{ entry.bill_number|default:"-" }}</td>
+                    <td>
+                        <a href="{% url 'customer_statement' entry.customer.id %}">{{ entry.customer.name }}</a><br>
+                        <small>Account #{{ entry.customer.id }} · {{ entry.customer.phone }}</small>
+                    </td>
+                    <td>{{ entry.items_description }}</td>
+                    <td>₹{{ entry.amount|floatformat:2 }}</td>
+                    <td>{{ entry.date_given|date:"d M Y" }}</td>
+                    <td>{{ entry.due_date|date:"d M Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">No credit entries have been recorded yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

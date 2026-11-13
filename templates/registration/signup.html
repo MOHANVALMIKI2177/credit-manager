@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#173b2c">
+    <title>{% if is_additional_account %}Create Account{% else %}Create Owner Account{% endif %} | Sri Jagadeeshwari Provision Stores</title>
+    <link rel="stylesheet" href="{% static 'ledger/style.css' %}?v=20261113-ui-refresh">
+</head>
+<body class="login-page">
+    <main class="login-card">
+        <a class="brand login-brand" href="{% url 'landing' %}">
+            <span class="brand-icon">SJ</span>
+            <span>
+                <strong>Sri Jagadeeshwari</strong>
+                <small>Provision Stores</small>
+            </span>
+        </a>
+
+        <span class="pill">{% if is_additional_account %}OWNER ACCESS{% else %}FIRST-TIME SETUP{% endif %}</span>
+        <h1>{% if is_additional_account %}Create another account{% else %}Create owner account{% endif %}</h1>
+        <p class="muted">
+            {% if is_additional_account %}
+                Add a login for another trusted person. Their account will share this shop's records.
+            {% else %}
+                Enter the owner and shop details to set up the account. Public signup closes after the first account is created.
+            {% endif %}
+        </p>
+
+        {% if form.non_field_errors %}
+            <div class="message error" role="alert">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+        {% endif %}
+
+        {% if is_additional_account and shop_profile %}
+            <section class="signup-shop-summary" aria-label="Shared shop details">
+                <h2>Shared shop</h2>
+                <p><strong>{{ shop_profile.shop_name }}</strong></p>
+                {% if shop_profile.phone %}<p>Shop phone: {{ shop_profile.phone }}</p>{% endif %}
+                {% if shop_profile.email %}<p>Shop email: {{ shop_profile.email }}</p>{% endif %}
+                {% if shop_profile.address %}<p>{{ shop_profile.address }}</p>{% endif %}
+                {% if shop_profile.gstin %}<p>GSTIN: {{ shop_profile.gstin }}</p>{% endif %}
+            </section>
+        {% endif %}
+
+        <form method="post" action="{% url 'owner_signup' %}" class="login-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <small class="helptext">{{ field.help_text|safe }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <small class="field-error" role="alert">{{ error }}</small>
+                {% endfor %}
+            {% endfor %}
+            <button class="primary-button full-width" type="submit">
+                Create owner account
+            </button>
+        </form>
+
+        <a class="back-link" href="{% url 'login' %}">Already have an account? Sign in</a>
+    </main>
+</body>
+</html>

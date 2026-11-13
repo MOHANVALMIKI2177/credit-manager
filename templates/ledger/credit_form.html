@@ -1,0 +1,63 @@
+﻿{% extends "ledger/base.html" %}
+
+{% block title %}{{ page_title }} | Smart Kirana Credit Manager{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Add Credit / New Purchase</h1>
+        <p>Record a new transaction for an existing customer with its total amount and any useful notes.</p>
+    </div>
+    <a href="{% url 'credits' %}" class="btn btn-secondary">
+        Back to Credit Records
+    </a>
+</div>
+
+<div class="form-card">
+    <h2>Bill Details</h2>
+    <p class="form-description">
+        Select a customer, enter the total bill amount, and add an optional note for future reference.
+    </p>
+
+    <form method="post" id="credit-form">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-errors">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="form-grid">
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {% if field.name == "customer" %}
+                        <input
+                            type="search"
+                            class="customer-choice-search"
+                            placeholder="Search customer short ID, name, or mobile"
+                            aria-label="Search existing customers by short ID, name, or mobile"
+                        >
+                    {% endif %}
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="helptext">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <p class="field-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Bill</button>
+            <a href="{% url 'credits' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

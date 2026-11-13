@@ -1,0 +1,191 @@
+
+{% extends "ledger/base.html" %}
+
+{% block content %}
+<div class="statement-page">
+
+    <div class="statement-header">
+        <div>
+            <p class="eyebrow">CUSTOMER ACCOUNT</p>
+            <h1>Customer Credit Statement</h1>
+            <p class="muted">{{ shop_profile.shop_name|default:"SRI JAGADEESHWARI PROVISION STORES" }}</p>
+            {% if shop_profile.address %}
+                <p class="muted">{{ shop_profile.address }}</p>
+            {% endif %}
+            {% if shop_profile.phone %}
+                <p class="muted">{{ shop_profile.phone }}</p>
+            {% endif %}
+        </div>
+
+        <div class="statement-actions">
+            <button type="button" class="btn btn-primary" onclick="window.print()">
+                Print Statement
+            </button>
+            <a href="{% url 'customers' %}" class="btn btn-secondary">
+                Back to Customers
+            </a>
+        </div>
+    </div>
+
+    <section class="statement-card">
+        <h2>Customer Details</h2>
+
+        <div class="customer-details-grid">
+            <div class="detail-item">
+                <span>Customer Name</span>
+                <strong>{{ customer.name }}</strong>
+            </div>
+
+            <div class="detail-item">
+                <span>Customer short ID</span>
+                <strong>{{ customer.customer_code }}</strong>
+            </div>
+
+            <div class="detail-item">
+                <span>Mobile Number</span>
+                <strong>{{ customer.phone }}</strong>
+            </div>
+
+            <div class="detail-item">
+                <span>Email Address</span>
+                <strong>{{ customer.email|default:"Not provided" }}</strong>
+            </div>
+
+            <div class="detail-item">
+                <span>Registered</span>
+                <strong>{{ customer.registered_date|date:"d M Y" }}</strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="statement-card">
+        <div class="section-heading">
+            <div>
+                <h2>Credit Entries</h2>
+                <p class="muted">Recorded transaction details</p>
+            </div>
+        </div>
+
+        {% if credits %}
+            {% for entry in credits %}
+                <div class="statement-entry">
+                    <div class="statement-entry-header">
+                        <div>
+                            <strong>Bill {{ entry.bill_number|default:"-" }}</strong>
+                            <span>{{ entry.date_given|date:"d M Y" }}</span>
+                        </div>
+                        <div class="statement-entry-total">₹{{ entry.amount|floatformat:2 }}</div>
+                    </div>
+
+                    {% if entry.items.all %}
+                    <div class="table-wrapper">
+                        <table class="statement-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Qty</th>
+                                    <th>Unit</th>
+                                    <th>Price</th>
+                                    <th>Line Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in entry.items.all %}
+                                <tr>
+                                    <td>{{ item.item_name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ item.unit }}</td>
+                                    <td>₹{{ item.unit_price|floatformat:2 }}</td>
+                                    <td>₹{{ item.line_total|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% elif entry.items_description %}
+                        <p class="muted"><strong>Note:</strong> {{ entry.items_description }}</p>
+                    {% endif %}
+
+                    <div class="statement-entry-meta">
+                        <span>Due date: {{ entry.due_date|date:"d M Y" }}</span>
+                        <span>Recorded: {{ entry.created_at|date:"d M Y, h:i A" }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">No credit entries found for this customer.</div>
+        {% endif %}
+    </section>
+
+    <section class="statement-card">
+        <div class="section-heading">
+            <div>
+                <h2>Payments Received</h2>
+                <p class="muted">Payments recorded by the shop owner</p>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="statement-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td>{{ payment.payment_date|date:"d M Y" }}</td>
+                        <td>₹{{ payment.amount|floatformat:2 }}</td>
+                        <td>
+                            {% if payment.acknowledged %}
+                                Acknowledged
+                            {% else %}
+                                Pending acknowledgement
+                            {% endif %}
+                        </td>
+                        <td>{{ payment.note|default:"—" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="empty-state">
+                            No payments recorded yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="balance-summary">
+        <h2>Balance Summary</h2>
+
+        <div class="balance-grid">
+            <div class="balance-item">
+                <span>Total Credit</span>
+                <strong>₹{{ total_credit|floatformat:2 }}</strong>
+            </div>
+
+            <div class="balance-item">
+                <span>Total Paid</span>
+                <strong>₹{{ total_paid|floatformat:2 }}</strong>
+            </div>
+
+            <div class="balance-item balance-due">
+                <span>Balance Due</span>
+                <strong>₹{{ balance_due|floatformat:2 }}</strong>
+            </div>
+        </div>
+
+        <p class="statement-note">
+            This statement reflects the credit entries and payments recorded
+            in the shop's system.
+        </p>
+    </section>
+
+</div>
+{% endblock %}

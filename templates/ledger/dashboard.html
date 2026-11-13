@@ -1,0 +1,162 @@
+
+{% extends "ledger/base.html" %}
+{% block title %}Dashboard | Smart Kirana Credit Manager{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">SHOP OVERVIEW</span>
+        <h1>Your shop at a glance</h1>
+        <p>A clear view of customer credit, collections, and what needs attention.</p>
+    </div>
+    <div class="heading-actions">
+        <a class="btn btn-secondary" href="{% url 'customers' %}">View customers</a>
+        <a class="btn btn-primary" href="{% url 'credit_create' %}">+ Add credit</a>
+        <a class="btn btn-secondary" href="{% url 'record_payment' %}">+ Record payment</a>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <article class="stat-card">
+        <span class="stat-label">Total credit</span>
+        <strong>₹{{ total_credit|floatformat:2 }}</strong>
+        <small>All recorded credit entries</small>
+    </article>
+
+    <article class="stat-card">
+        <span class="stat-label">Total payments</span>
+        <strong>₹{{ total_payments|floatformat:2 }}</strong>
+        <small>All recorded payments</small>
+    </article>
+
+    <article class="stat-card highlight-card">
+        <span class="stat-label">Outstanding balance</span>
+        <strong>₹{{ total_outstanding|floatformat:2 }}</strong>
+        <small>Credit minus recorded payments</small>
+    </article>
+
+    <article class="stat-card">
+        <span class="stat-label">Customer accounts</span>
+        <strong>{{ customer_count }}</strong>
+        <small>Registered customer records</small>
+    </article>
+</div>
+
+<section class="content-card">
+    <div class="section-title-row">
+        <div>
+            <h2>Shortcuts</h2>
+            <p>Jump straight into your day-to-day tasks.</p>
+        </div>
+    </div>
+
+    <div class="quick-links">
+        <a href="{% url 'customers' %}">
+            <span class="quick-link-icon" aria-hidden="true">01</span>
+            <span><strong>Customers</strong><small>Find an account or view a statement</small></span>
+            <span class="quick-link-arrow" aria-hidden="true">→</span>
+        </a>
+        <a href="{% url 'credits' %}">
+            <span class="quick-link-icon" aria-hidden="true">02</span>
+            <span><strong>Credit records</strong><small>Review purchases and due dates</small></span>
+            <span class="quick-link-arrow" aria-hidden="true">→</span>
+        </a>
+        <a href="{% url 'payments' %}">
+            <span class="quick-link-icon" aria-hidden="true">03</span>
+            <span><strong>Payments</strong><small>Track received and pending payments</small></span>
+            <span class="quick-link-arrow" aria-hidden="true">→</span>
+        </a>
+        <a href="{% url 'reminders' %}">
+            <span class="quick-link-icon" aria-hidden="true">04</span>
+            <span><strong>Reminder centre</strong><small>Follow up on upcoming dues</small></span>
+            <span class="quick-link-arrow" aria-hidden="true">→</span>
+        </a>
+    </div>
+</section>
+
+<section class="content-card">
+    <div class="section-title-row">
+        <div>
+            <h2>Recent credit entries</h2>
+            <p>Your latest recorded transactions.</p>
+        </div>
+        <a class="text-link" href="{% url 'credits' %}">View all</a>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Note / details</th>
+                    <th>Amount</th>
+                    <th>Due date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in recent_entries %}
+                <tr>
+                    <td>
+                        <a href="{% url 'customer_statement' entry.customer.id %}">{{ entry.customer.name }}</a><br>
+                        <small>Account #{{ entry.customer.id }} · {{ entry.customer.phone }}</small>
+                    </td>
+                    <td>{{ entry.items_description }}</td>
+                    <td>₹{{ entry.amount|floatformat:2 }}</td>
+                    <td>{{ entry.due_date|date:"d M Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No credit entries have been recorded yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="content-card">
+    <div class="section-title-row">
+        <div>
+            <h2>Recent payments</h2>
+            <p>Latest payments entered in the system.</p>
+        </div>
+        <a class="text-link" href="{% url 'payments' %}">View all</a>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Receipt status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in recent_payments %}
+                <tr>
+                    <td>
+                        <a href="{% url 'customer_statement' payment.customer.id %}">{{ payment.customer.name }}</a><br>
+                        <small>Account #{{ payment.customer.id }} · {{ payment.customer.phone }}</small>
+                    </td>
+                    <td>₹{{ payment.amount|floatformat:2 }}</td>
+                    <td>{{ payment.payment_date|date:"d M Y" }}</td>
+                    <td>
+                        {% if payment.acknowledged %}
+                            <span class="status status-paid">Acknowledged</span>
+                        {% else %}
+                            <span class="status status-pending">Pending</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No payments have been recorded yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

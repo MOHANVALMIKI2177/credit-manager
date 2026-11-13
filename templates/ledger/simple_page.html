@@ -1,0 +1,31 @@
+
+{% extends "ledger/base.html" %}
+{% block title %}{{ page_title }} | Smart Kirana Credit Manager{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">SHOP MANAGEMENT</span>
+        <h1>{{ page_title }}</h1>
+        <p>{{ page_subtitle }}</p>
+    </div>
+</div>
+
+<section class="content-card">
+    <div class="notice">
+        This section is planned for the next development phase.
+        Your existing customer, credit and payment records are not affected.
+    </div>
+
+    <h2>Planned features</h2>
+
+    <div class="planned-list">
+        {% for feature in features %}
+        <div class="planned-item">
+            <span class="planned-check">✓</span>
+            <span>{{ feature }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

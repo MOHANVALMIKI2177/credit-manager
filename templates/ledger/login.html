@@ -1,0 +1,72 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Login | Smart Kirana Credit Manager</title>
+    <link rel="stylesheet" href="{% static 'ledger/style.css' %}?v=20261113-ui-refresh">
+</head>
+<body class="login-page">
+    <main class="login-card">
+        <a class="brand login-brand" href="{% url 'landing' %}">
+            <span class="brand-icon">SJ</span>
+            <span>
+                <strong>Sri Jagadeeshwari</strong>
+                <small>Credit Manager</small>
+            </span>
+        </a>
+
+        <span class="pill">OWNER ACCESS</span>
+        <h1>Welcome back</h1>
+        <p class="muted">Sign in to manage your shop records.</p>
+
+        {% if form.errors %}
+            <div class="message error">
+                The username or password is incorrect. Please try again.
+            </div>
+        {% endif %}
+
+        {% if next %}
+            {% if user.is_authenticated %}
+                <div class="message error">
+                    Your account cannot access that page.
+                </div>
+            {% endif %}
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}" class="login-form">
+            {% csrf_token %}
+
+            <label for="id_username">Username</label>
+            <input
+                id="id_username"
+                type="text"
+                name="username"
+                autocomplete="username"
+                required
+                autofocus
+            >
+
+            <label for="id_password">Password</label>
+            <input
+                id="id_password"
+                type="password"
+                name="password"
+                autocomplete="current-password"
+                required
+            >
+
+            <input type="hidden" name="next" value="{{ next }}">
+            <button class="primary-button full-width" type="submit">
+                Sign in securely
+            </button>
+        </form>
+
+        <a class="back-link" href="{% url 'landing' %}">
+            ← Back to home
+        </a>
+    </main>
+</body>
+</html>

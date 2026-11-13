@@ -1,0 +1,103 @@
+
+{% extends "ledger/base.html" %}
+{% block title %}Payments | Smart Kirana Credit Manager{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Payments</h1>
+        <p>Review payments and confirm money received.</p>
+    </div>
+    <a href="{% url 'record_payment' %}" class="btn btn-primary">
+        + Record Payment
+    </a>
+</div>
+
+<div class="content-card">
+    <h2>Pending Acknowledgement</h2>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th>Payment Date</th>
+                    <th>Note</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in pending_payments %}
+                <tr>
+                    <td>
+                        <a href="{% url 'customer_statement' payment.customer.id %}">{{ payment.customer.name }}</a><br>
+                        <small>Account #{{ payment.customer.id }} · {{ payment.customer.phone }}</small>
+                    </td>
+                    <td>₹{{ payment.amount }}</td>
+                    <td>{{ payment.payment_date|date:"d M Y" }}</td>
+                    <td>{{ payment.note|default:"—" }}</td>
+                    <td>
+                        <form method="post"
+                              action="{% url 'acknowledge_payment' payment.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">
+                                Confirm Received
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No payments awaiting acknowledgement.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="content-card">
+    <h2>Confirmed Payments</h2>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th>Payment Date</th>
+                    <th>Acknowledged At</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in confirmed_payments %}
+                <tr>
+                    <td>
+                        <a href="{% url 'customer_statement' payment.customer.id %}">{{ payment.customer.name }}</a><br>
+                        <small>Account #{{ payment.customer.id }} · {{ payment.customer.phone }}</small>
+                    </td>
+                    <td>₹{{ payment.amount }}</td>
+                    <td>{{ payment.payment_date|date:"d M Y" }}</td>
+                    <td>
+                        {% if payment.acknowledged_at %}
+                            {{ payment.acknowledged_at|date:"d M Y, h:i A" }}
+                        {% else %}
+                            Historical payment
+                        {% endif %}
+                    </td>
+                    <td>Confirmed</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No confirmed payments yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

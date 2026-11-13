@@ -1,0 +1,186 @@
+
+{% extends "ledger/base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Add Customer</h1>
+        <p>Save a customer's contact details in your shop records.</p>
+    </div>
+    <a href="{% url 'customers' %}" class="btn btn-secondary">
+        Back to Customers
+    </a>
+</div>
+
+<div class="form-card">
+    <h2>Customer Details</h2>
+    <p class="form-description">
+        Enter the customer's name and mobile number. Email, PAN, GSTIN, and
+        address are optional. The system assigns a unique customer short ID.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+    {% if duplicate_matches %}
+        <section class="duplicate-review" role="alert" aria-labelledby="duplicate-title">
+            <h2 id="duplicate-title">Review possible matching accounts</h2>
+            <p>
+                A customer with matching details may already exist. Please review
+                the existing customer before creating another account.
+            </p>
+
+            {% for match in duplicate_matches %}
+                <article class="duplicate-customer-card">
+                    <div class="duplicate-customer-heading">
+                        <div>
+                            <strong>{{ match.customer.customer_code }} — {{ match.customer.name }}</strong>
+                            <p>Possible match: {{ match.identifiers|join:", " }}</p>
+                        </div>
+                        <span class="balance-badge">
+                            Outstanding ₹{{ match.balance|floatformat:2 }}
+                        </span>
+                    </div>
+
+                    <dl class="duplicate-customer-details">
+                        <div>
+                            <dt>Mobile</dt>
+                            <dd>{{ match.masked_phone }}</dd>
+                        </div>
+                        <div>
+                            <dt>Email</dt>
+                            <dd>{{ match.customer.email|default:"Not provided" }}</dd>
+                        </div>
+                        {% if match.masked_pan %}
+                            <div>
+                                <dt>PAN</dt>
+                                <dd>{{ match.masked_pan }}</dd>
+                            </div>
+                        {% endif %}
+                        {% if match.masked_gstin %}
+                            <div>
+                                <dt>GSTIN</dt>
+                                <dd>{{ match.masked_gstin }}</dd>
+                            </div>
+                        {% endif %}
+                    </dl>
+
+                    <details class="duplicate-comparison">
+                        <summary>Review Details</summary>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Detail</th>
+                                        <th>Entered now</th>
+                                        <th>Existing account</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th>Full name</th>
+                                        <td>{{ submitted_details.name }}</td>
+                                        <td>{{ match.customer.name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Mobile</th>
+                                        <td>{{ submitted_details.phone }}</td>
+                                        <td>{{ match.masked_phone }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Email</th>
+                                        <td>{{ submitted_details.email|default:"Not provided" }}</td>
+                                        <td>{{ match.customer.email|default:"Not provided" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>PAN</th>
+                                        <td>{{ submitted_details.pan_number|default:"Not provided" }}</td>
+                                        <td>{{ match.masked_pan|default:"Not provided" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>GSTIN</th>
+                                        <td>{{ submitted_details.gstin|default:"Not provided" }}</td>
+                                        <td>{{ match.masked_gstin|default:"Not provided" }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+
+                    <div class="duplicate-actions">
+                        <a class="btn btn-secondary" href="{% url 'customer_statement' match.customer.pk %}">
+                            Open Existing Customer
+                        </a>
+                        <a class="btn btn-secondary" href="{% url 'credit_create' %}?customer_id={{ match.customer.pk }}">
+                            Use Existing Customer
+                        </a>
+                    </div>
+                </article>
+            {% endfor %}
+
+            {% if block_separate_customer %}
+                <p class="duplicate-block-message">
+                    A PAN or GSTIN is already assigned to an existing account.
+                    A second account cannot be created with that identifier.
+                    Open the existing account or correct the entered identifier.
+                </p>
+            {% else %}
+                <div class="separate-customer-confirmation">
+                    <p>
+                        If this is a different person (for example, a family
+                        member sharing a phone), confirm that you reviewed the
+                        match before creating a separate account.
+                    </p>
+                    <button
+                        type="submit"
+                        name="confirm_separate"
+                        value="yes"
+                        class="btn btn-primary"
+                    >
+                        Create Separate Customer
+                    </button>
+                </div>
+            {% endif %}
+        </section>
+    {% endif %}
+
+        {% if form.non_field_errors %}
+            <div class="form-errors">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                    {% if field.field.required %}
+                        <span class="required">*</span>
+                    {% else %}
+                        <span class="optional">(Optional)</span>
+                    {% endif %}
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+
+                {% for error in field.errors %}
+                    <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                Save Customer
+            </button>
+            <a href="{% url 'customers' %}" class="btn btn-secondary">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

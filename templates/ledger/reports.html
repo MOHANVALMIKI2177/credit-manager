@@ -1,0 +1,194 @@
+{% extends "ledger/base.html" %}
+{% block title %}Reports & Statements | {{ shop_profile.shop_name|default:"Smart Kirana Credit Manager" }}{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">BUSINESS OVERVIEW</span>
+        <h1>Reports &amp; statements</h1>
+        <p>Explore credit activity and collections by date, with current customer balances.</p>
+    </div>
+    <button type="button" class="btn btn-secondary" onclick="window.print()">Print report</button>
+</div>
+
+<section class="content-card report-filter-card">
+    <form method="get" class="report-filter-form">
+        {% if filters.non_field_errors %}
+            <div class="form-errors">{{ filters.non_field_errors }}</div>
+        {% endif %}
+        {% for field in filters %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% for error in field.errors %}
+                    <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        <div class="report-actions">
+            <button type="submit" class="btn btn-primary">Apply dates</button>
+            <button type="submit" class="btn btn-secondary" name="export" value="csv">Export CSV</button>
+        </div>
+    </form>
+</section>
+
+{% if report %}
+    <div class="report-range-note">
+        Activity from <strong>{{ start_date|date:"d M Y" }}</strong> through
+        <strong>{{ end_date|date:"d M Y" }}</strong>.
+        Current outstanding balances include the full account history.
+    </div>
+
+    <div class="stats-grid">
+        <article class="stat-card">
+            <span class="stat-label">Credit in period</span>
+            <strong>₹{{ report.period_credit|floatformat:2 }}</strong>
+            <small>Purchases dated in this range</small>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Collected in period</span>
+            <strong>₹{{ report.period_collections|floatformat:2 }}</strong>
+            <small>Acknowledged payments only</small>
+        </article>
+        <article class="stat-card highlight-card">
+            <span class="stat-label">Current outstanding</span>
+            <strong>₹{{ report.total_outstanding|floatformat:2 }}</strong>
+            <small>All recorded credit minus acknowledged payments</small>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Accounts with past-due bills</span>
+            <strong>{{ report.overdue_accounts }}</strong>
+            <small>Account has balance and a bill past its due date</small>
+        </article>
+    </div>
+
+    <section class="content-card">
+        <div class="section-title-row">
+            <div>
+                <h2>Daily activity</h2>
+                <p>Credit purchases and acknowledged collections per day.</p>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th>Date</th><th>Credit</th><th>Collections</th><th>Net activity</th></tr>
+                </thead>
+                <tbody>
+                    {% for day in report.daily_activity %}
+                        <tr>
+                            <td>{{ day.date|date:"d M Y" }}</td>
+                            <td>₹{{ day.credit|floatformat:2 }}</td>
+                            <td>₹{{ day.collections|floatformat:2 }}</td>
+                            <td>₹{{ day.net|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4" class="empty-state">No credit or acknowledged payment activity in this date range.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="content-card">
+        <div class="section-title-row">
+            <div>
+                <h2>Customer account balances</h2>
+                <p>All-time balances; unacknowledged payments are not counted as received.</p>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table class="customer-table">
+                <thead>
+                    <tr><th>Customer</th><th>Mobile</th><th>Total credit</th><th>Acknowledged payments</th><th>Outstanding</th><th>Account status</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for row in report.customer_rows %}
+                        <tr>
+                            <td>{{ row.customer.name }}<br><small>Account #{{ row.customer.id }}</small></td>
+                            <td>{{ row.customer.phone }}</td>
+                            <td>₹{{ row.credit|floatformat:2 }}</td>
+                            <td>₹{{ row.paid|floatformat:2 }}</td>
+                            <td class="money-cell">₹{{ row.balance|floatformat:2 }}</td>
+                            <td>
+                                {% if row.has_overdue_bill %}
+                                    <span class="status status-overdue">Past due</span>
+                                {% elif row.balance > 0 %}
+                                    <span class="status status-upcoming">Outstanding</span>
+                                {% else %}
+                                    <span class="status status-paid">Settled</span>
+                                {% endif %}
+                            </td>
+                            <td><a class="statement-link" href="{% url 'customer_statement' row.customer.id %}">Statement</a></td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="7" class="empty-state">No customer accounts found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="content-card">
+        <div class="section-title-row">
+            <div>
+                <h2>Credit bills</h2>
+                <p>Purchases recorded during the selected period.</p>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead><tr><th>Bill</th><th>Date</th><th>Customer</th><th>Note / details</th><th>Amount</th><th>Due date</th></tr></thead>
+                <tbody>
+                    {% for entry in report.credit_entries %}
+                        <tr>
+                            <td>{{ entry.bill_number|default:"—" }}</td>
+                            <td>{{ entry.date_given|date:"d M Y" }}</td>
+                            <td>{{ entry.customer.name }}</td>
+                            <td>{{ entry.items_description }}</td>
+                            <td>₹{{ entry.amount|floatformat:2 }}</td>
+                            <td>{{ entry.due_date|date:"d M Y" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="6" class="empty-state">No credit bills in this date range.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="content-card">
+        <div class="section-title-row">
+            <div>
+                <h2>Payments</h2>
+                <p>All payment records in the selected period, with acknowledgement status.</p>
+            </div>
+            <span class="report-pending-total">Pending: ₹{{ report.pending_payments|floatformat:2 }}</span>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead><tr><th>Date</th><th>Customer</th><th>Note</th><th>Status</th><th>Amount</th></tr></thead>
+                <tbody>
+                    {% for payment in report.payments %}
+                        <tr>
+                            <td>{{ payment.payment_date|date:"d M Y" }}</td>
+                            <td>{{ payment.customer.name }}</td>
+                            <td>{{ payment.note|default:"—" }}</td>
+                            <td>
+                                {% if payment.acknowledged %}
+                                    <span class="status status-paid">Acknowledged</span>
+                                {% else %}
+                                    <span class="status status-pending">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>₹{{ payment.amount|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5" class="empty-state">No payments in this date range.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,123 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#173b2c">
+    <title>{% block title %}Smart Kirana Credit Manager{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'ledger/style.css' %}?v=20261113-ui-refresh">
+    <script src="{% static 'ledger/customer-select.js' %}?v=20261010-customer-registration-v1" defer></script>
+</head>
+<body class="app-body">
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+{% if user.is_authenticated %}
+<div class="app-layout">
+
+    <aside class="sidebar">
+        <a href="{% url 'dashboard' %}" class="brand">
+            <span class="brand-icon">SJ</span>
+            <span>
+                <strong>{{ shop_profile.shop_name|default:"Sri Jagadeeshwari" }}</strong>
+                <small>Credit Manager</small>
+            </span>
+        </a>
+
+        <p class="sidebar-label">WORKSPACE</p>
+
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}>
+                <span class="nav-icon nav-dashboard" aria-hidden="true"></span>Dashboard
+            </a>
+            <a href="{% url 'customers' %}" {% if request.resolver_match.url_name == 'customers' or request.resolver_match.url_name == 'customer_create' or request.resolver_match.url_name == 'customer_statement' %}aria-current="page"{% endif %}>
+                <span class="nav-icon nav-customers" aria-hidden="true"></span>Customers
+            </a>
+            <a href="{% url 'credits' %}" {% if request.resolver_match.url_name == 'credits' or request.resolver_match.url_name == 'credit_create' %}aria-current="page"{% endif %}>
+                <span class="nav-icon nav-credits" aria-hidden="true"></span>Credit records
+            </a>
+            <a href="{% url 'payments' %}" {% if request.resolver_match.url_name == 'payments' or request.resolver_match.url_name == 'record_payment' %}aria-current="page"{% endif %}>
+                <span class="nav-icon nav-payments" aria-hidden="true"></span>Payments
+            </a>
+            <a href="{% url 'reminders' %}" {% if request.resolver_match.url_name == 'reminders' %}aria-current="page"{% endif %}>
+                <span class="nav-icon nav-reminders" aria-hidden="true"></span>Reminder centre
+            </a>
+            <a href="{% url 'reports' %}" {% if request.resolver_match.url_name == 'reports' %}aria-current="page"{% endif %}>
+                <span class="nav-icon nav-reports" aria-hidden="true"></span>Reports &amp; statements
+            </a>
+            <a href="{% url 'settings' %}" {% if request.resolver_match.url_name == 'settings' %}aria-current="page"{% endif %}>
+                <span class="nav-icon nav-settings" aria-hidden="true"></span>Settings
+            </a>
+            <a href="{% url 'owner_account_create' %}" {% if request.resolver_match.url_name == 'owner_account_create' %}aria-current="page"{% endif %}>
+                <span class="nav-icon nav-customers" aria-hidden="true"></span>Create account
+            </a>
+        </nav>
+
+        <div class="sidebar-note">
+            <span class="sidebar-note-mark" aria-hidden="true">✓</span>
+            <div>
+                <strong>Everything in one place</strong>
+                <small>Your shop records, always organised.</small>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <span class="owner-avatar">{{ request.user.username|first|upper }}</span>
+            <div>
+                <strong>{{ request.user.username }}</strong>
+                <small>Shop administrator</small>
+            </div>
+        </div>
+    </aside>
+
+    <div class="main-panel">
+        <header class="topbar">
+            <div class="topbar-copy">
+                <span class="topbar-label">SHOP WORKSPACE</span>
+                <strong>{{ shop_profile.shop_name|default:"Sri Jagadeeshwari Provision Stores" }}</strong>
+            </div>
+
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button class="logout-button" type="submit">
+                    <span aria-hidden="true">↗</span> Sign out
+                </button>
+            </form>
+        </header>
+
+        <main class="main-content" id="main-content">
+
+{% else %}
+
+<main class="public-page" id="main-content">
+
+{% endif %}
+
+    {% if messages %}
+        <div class="messages-area">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+{% if user.is_authenticated %}
+
+        </main>
+        <footer class="app-footer">
+            {{ shop_profile.shop_name|default:"Sri Jagadeeshwari Provision Stores" }} · Smart Credit Management
+        </footer>
+    </div>
+</div>
+
+{% else %}
+
+</main>
+
+{% endif %}
+
+</body>
+</html>

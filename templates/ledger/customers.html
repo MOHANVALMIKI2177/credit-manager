@@ -1,0 +1,162 @@
+
+{% extends "ledger/base.html" %}
+
+{% block title %}Customers | Smart Kirana Credit Manager{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">CUSTOMER MANAGEMENT</span>
+        <h1>Customers</h1>
+        <p>
+            Manage customer details, track outstanding balances,
+            and view each customer's complete transaction history.
+        </p>
+    </div>
+
+    <a href="{% url 'customer_create' %}" class="btn btn-primary">
+        + Add Customer
+    </a>
+</div>
+
+<!-- Customer summary -->
+<div class="customer-info-banner">
+    <div class="customer-info-icon">👥</div>
+    <div>
+        <h3>Customer Accounts</h3>
+        <p>
+            Each customer has a separate account containing their
+            credit records, payments, and outstanding balance.
+        </p>
+    </div>
+</div>
+
+<!-- Customer search and records -->
+<section class="content-card">
+
+    <div class="customer-section-heading">
+        <div>
+            <h2>All Customers</h2>
+            <p>Search by short ID, customer name, or mobile number.</p>
+        </div>
+    </div>
+
+    <form
+        method="get"
+        action="{% url 'customers' %}"
+        class="search-form"
+    >
+        <input
+            type="search"
+            name="search"
+            placeholder="Search CUST-0001, name, or mobile..."
+            value="{{ search_query }}"
+            aria-label="Search customers"
+        >
+
+        <button class="primary-button" type="submit">
+            Search
+        </button>
+
+        {% if search_query %}
+            <a
+                class="secondary-button"
+                href="{% url 'customers' %}"
+            >
+                Clear
+            </a>
+        {% endif %}
+    </form>
+
+    <div class="table-wrapper">
+        <table class="customer-table">
+            <thead>
+                <tr>
+                    <th>Customer Details</th>
+                    <th>Mobile Number</th>
+                    <th>Total Credit</th>
+                    <th>Total Paid</th>
+                    <th>Balance Due</th>
+                    <th>Customer History</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in customer_rows %}
+                <tr>
+                    <td>
+                        <div class="customer-name-cell">
+                            <span class="customer-avatar">
+                                {{ row.customer.name|first|upper }}
+                            </span>
+
+                            <div>
+                                <strong>{{ row.customer.name }}</strong>
+                                <small>
+                                    {{ row.customer.customer_code }}
+                                </small>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        {{ row.customer.phone }}
+                    </td>
+
+                    <td class="money-cell">
+                        ₹{{ row.credit|floatformat:2 }}
+                    </td>
+
+                    <td class="money-cell paid-amount">
+                        ₹{{ row.paid|floatformat:2 }}
+                    </td>
+
+                    <td>
+                        <span class="balance-badge">
+                            ₹{{ row.balance|floatformat:2 }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <a
+                            href="{% url 'customer_statement' row.customer.id %}"
+                            class="statement-link"
+                        >
+                            View History →
+                        </a>
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="empty-customers">
+                        <div class="empty-icon">🔎</div>
+                        <strong>No customers found</strong>
+                        <p>
+                            {% if search_query %}
+                                Try another name or mobile number.
+                            {% else %}
+                                Add your first customer to begin recording
+                                credit transactions.
+                            {% endif %}
+                        </p>
+
+                        {% if not search_query %}
+                            <a
+                                href="{% url 'customer_create' %}"
+                                class="btn btn-primary"
+                            >
+                                + Add First Customer
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</section>
+
+{% endblock %}

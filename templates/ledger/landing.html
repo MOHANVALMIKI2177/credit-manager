@@ -1,0 +1,83 @@
+
+{% extends "ledger/base.html" %}
+{% block title %}Welcome | Smart Kirana Credit Manager{% endblock %}
+
+{% block content %}
+<section class="landing-hero">
+    <div class="hero-copy">
+        <span class="pill">SMART SHOP MANAGEMENT</span>
+        <h1>Manage credit.<br>Build customer trust.</h1>
+        <p>
+            A simple, organised way to manage customer credit, record
+            payments and keep track of upcoming dues at your provision store.
+        </p>
+
+        <a class="primary-button" href="{% url 'login' %}">
+            Owner Login →
+        </a>
+        {% if owner_signup_available %}
+        <a class="secondary-button" href="{% url 'owner_signup' %}">
+            Create Owner Account
+        </a>
+        {% endif %}
+
+        <div class="trust-note">
+            Secure owner access · Clear records · Friendly reminders
+        </div>
+    </div>
+
+    <div class="hero-visual">
+        <div class="preview-card">
+            <span class="preview-label">SHOP OVERVIEW</span>
+            <h3>Credit management, made simple.</h3>
+            <div class="preview-line">
+                <span>Customer records</span>
+                <strong>Organised</strong>
+            </div>
+            <div class="preview-line">
+                <span>Payment tracking</span>
+                <strong>Clear</strong>
+            </div>
+            <div class="preview-line">
+                <span>Due reminders</span>
+                <strong>Planned</strong>
+            </div>
+            <div class="preview-bottom">
+                Keep every transaction in one reliable place.
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-heading">
+    <span class="eyebrow">BUILT FOR YOUR STORE</span>
+    <h2>Everything organised in one place</h2>
+    <p>Dedicated pages make daily shop management easier.</p>
+</section>
+
+<div class="feature-grid">
+    <article class="feature-card">
+        <span class="feature-icon">01</span>
+        <h3>Customer records</h3>
+        <p>Keep customer contact details and individual statements organised.</p>
+    </article>
+
+    <article class="feature-card">
+        <span class="feature-icon">02</span>
+        <h3>Credit tracking</h3>
+        <p>Review grocery credit entries, due dates and outstanding balances.</p>
+    </article>
+
+    <article class="feature-card">
+        <span class="feature-icon">03</span>
+        <h3>Payment history</h3>
+        <p>Record customer payments and maintain a clear transaction history.</p>
+    </article>
+
+    <article class="feature-card">
+        <span class="feature-icon">04</span>
+        <h3>Friendly reminders</h3>
+        <p>Prepare a reminder system for polite payment notifications.</p>
+    </article>
+</div>
+{% endblock %}

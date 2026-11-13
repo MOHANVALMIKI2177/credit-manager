@@ -1,0 +1,135 @@
+{% extends "ledger/base.html" %}
+{% block title %}Reminder Centre | {{ shop_profile.shop_name|default:"Smart Kirana Credit Manager" }}{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">CUSTOMER FOLLOW-UP</span>
+        <h1>Reminder centre</h1>
+        <p>Review accounts coming due and send a polite email when appropriate.</p>
+    </div>
+    <a href="{% url 'settings' %}" class="btn btn-secondary">Reminder settings</a>
+</div>
+
+<section class="content-card">
+    <div class="section-title-row">
+        <div>
+            <h2>Due soon and overdue</h2>
+            <p>Only accounts with a positive balance and a bill due within the configured reminder window are listed.</p>
+        </div>
+    </div>
+
+    {% if not profile.enable_email_reminders %}
+        <div class="notice">
+            Email reminders are currently disabled. Enable them in Shop Settings before sending.
+        </div>
+    {% endif %}
+    {% if console_email_backend %}
+        <div class="notice">
+            The application is using Django's development console email backend. Reminder messages appear in the server console;
+            configure an SMTP backend in the environment before sending emails to customers.
+        </div>
+    {% endif %}
+    <div class="notice reminder-channel-note">
+        Email uses the configured Django email backend. SMS delivery needs a provider integration and is not enabled here.
+        Daily automated delivery runs only when the <code>process_reminders</code> command is scheduled on the server.
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Customer account</th>
+                    <th>Next due date</th>
+                    <th>Account balance</th>
+                    <th>Contact</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in candidates %}
+                    <tr>
+                        <td>
+                            <strong>{{ row.customer.name }}</strong><br>
+                            <small>Account #{{ row.customer.id }}</small>
+                        </td>
+                        <td>
+                            {{ row.next_due_date|date:"d M Y" }}
+                            {% if row.is_overdue %}
+                                <span class="status status-overdue">Overdue</span>
+                            {% else %}
+                                <span class="status status-upcoming">Due soon</span>
+                            {% endif %}
+                        </td>
+                        <td class="money-cell">₹{{ row.balance|floatformat:2 }}</td>
+                        <td>
+                            {% if row.customer.email %}
+                                {{ row.customer.email }}
+                            {% else %}
+                                <span class="muted">No email recorded</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if row.customer.email and profile.enable_email_reminders %}
+                                <form method="post" action="{% url 'send_reminder' row.customer.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary">Send email</button>
+                                </form>
+                            {% else %}
+                                <span class="muted">Unavailable</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            No accounts with an outstanding balance are due in this reminder window.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="content-card">
+    <div class="section-title-row">
+        <div>
+            <h2>Recent reminder activity</h2>
+            <p>Latest delivery attempts, including failures.</p>
+        </div>
+    </div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Channel</th>
+                    <th>Attempt date</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in reminder_logs %}
+                    <tr>
+                        <td>{{ log.customer.name }}</td>
+                        <td>{{ log.get_reminder_type_display }}</td>
+                        <td>{{ log.scheduled_for|date:"d M Y" }}</td>
+                        <td>
+                            <span class="status {% if log.status == 'sent' %}status-paid{% elif log.status == 'failed' %}status-failed{% else %}status-pending{% endif %}">
+                                {% if log.status == "sent" %}Accepted by backend{% else %}{{ log.get_status_display }}{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ log.notes|default:"—" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-state">No reminder attempts have been recorded.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

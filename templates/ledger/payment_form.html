@@ -1,0 +1,56 @@
+```html
+{% extends "ledger/base.html" %}
+
+{% block title %}Record Payment | Smart Kirana{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Record Payment</h1>
+        <p>Record money received from a customer.</p>
+    </div>
+    <a href="{% url 'payments' %}" class="btn btn-secondary">
+        Back to Payments
+    </a>
+</div>
+
+<div class="form-card">
+    <h2>Payment Details</h2>
+    <p class="form-description">
+        After saving, confirm the payment only when the shop owner
+        has actually received the money.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+
+                {% if field.name == "customer" %}
+                    <input
+                        type="search"
+                        class="customer-choice-search"
+                        placeholder="Search customer short ID, name, or mobile"
+                        aria-label="Search existing customers by short ID, name, or mobile"
+                    >
+                {% endif %}
+
+                {{ field }}
+
+                {% for error in field.errors %}
+                    <p class="field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary">
+            Record Pending Payment
+        </button>
+    </form>
+</div>
+{% endblock %}
+```
