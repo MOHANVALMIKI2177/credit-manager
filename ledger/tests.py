@@ -270,6 +270,7 @@ class CustomerAccountFlowTests(TestCase):
             [Decimal("500.00"), Decimal("200.00"), Decimal("300.00")],
         )
         self.assertEqual(len({bill.bill_number for bill in bills}), 3)
+        self.assertTrue(all(bill.bill_number.startswith("CM-") for bill in bills))
         self.assertTrue(
             all(bill.customer_id == self.customer.pk for bill in bills)
         )

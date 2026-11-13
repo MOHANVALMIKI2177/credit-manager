@@ -139,7 +139,7 @@ class CreditItem(models.Model):
 
 
 class ShopProfile(models.Model):
-    shop_name = models.CharField(max_length=150, default="SRI JAGADEESHWARI PROVISION STORES")
+    shop_name = models.CharField(max_length=150, default="Credit Manager")
     phone = models.CharField(max_length=20, blank=True, default="")
     email = models.EmailField(blank=True, default="")
     address = models.CharField(max_length=250, blank=True, default="")

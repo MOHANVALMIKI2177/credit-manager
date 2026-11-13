@@ -62,7 +62,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Smart Kirana Credit Manager app
+    # Credit Manager app
     'ledger',
 ]
 

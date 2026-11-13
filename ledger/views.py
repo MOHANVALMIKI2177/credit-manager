@@ -116,7 +116,7 @@ def owner_signup(request):
 def generate_bill_number():
     """Generate a unique bill number for a new credit record."""
     today = timezone.localdate().strftime("%Y%m%d")
-    prefix = f"SJ-{today}-"
+    prefix = f"CM-{today}-"
     recent = CreditEntry.objects.filter(bill_number__startswith=prefix).count() + 1
     return f"{prefix}{recent:04d}"
 

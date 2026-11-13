@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#173b2c">
-    <title>{% block title %}Smart Kirana Credit Manager{% endblock %}</title>
+    <title>{% block title %}Credit Manager{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'ledger/style.css' %}?v=20261113-ui-refresh">
     <script src="{% static 'ledger/customer-select.js' %}?v=20261010-customer-registration-v1" defer></script>
 </head>
@@ -18,9 +18,9 @@
 
     <aside class="sidebar">
         <a href="{% url 'dashboard' %}" class="brand">
-            <span class="brand-icon">SJ</span>
+            <span class="brand-icon">CM</span>
             <span>
-                <strong>{{ shop_profile.shop_name|default:"Sri Jagadeeshwari" }}</strong>
+                <strong>{{ shop_profile.shop_name|default:"Credit Manager" }}</strong>
                 <small>Credit Manager</small>
             </span>
         </a>
@@ -75,7 +75,7 @@
         <header class="topbar">
             <div class="topbar-copy">
                 <span class="topbar-label">SHOP WORKSPACE</span>
-                <strong>{{ shop_profile.shop_name|default:"Sri Jagadeeshwari Provision Stores" }}</strong>
+                <strong>{{ shop_profile.shop_name|default:"Credit Manager" }}</strong>
             </div>
 
             <form method="post" action="{% url 'logout' %}">
@@ -108,7 +108,7 @@
 
         </main>
         <footer class="app-footer">
-            {{ shop_profile.shop_name|default:"Sri Jagadeeshwari Provision Stores" }} · Smart Credit Management
+            {{ shop_profile.shop_name|default:"Credit Manager" }} · Credit Management
         </footer>
     </div>
 </div>

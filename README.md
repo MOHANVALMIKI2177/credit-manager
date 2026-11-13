@@ -1,4 +1,4 @@
-# Sri Jagadeeshwari Credit Manager
+# Credit Manager
 
 Django application for customer accounts, manually entered credit bills and notes, payment acknowledgement, customer statements, reports, and payment reminders.
 
@@ -65,7 +65,7 @@ $env:EMAIL_HOST_USER = "<smtp-username>"
 $env:EMAIL_HOST_PASSWORD = "<smtp-password>"
 $env:EMAIL_USE_TLS = "true"
 $env:EMAIL_USE_SSL = "false"
-$env:DEFAULT_FROM_EMAIL = "Sri Jagadeeshwari Provision Stores <shop@your-domain.example>"
+$env:DEFAULT_FROM_EMAIL = "Credit Manager <shop@your-domain.example>"
 ```
 
 The project loads values from a `.env` file in the project root; explicitly set process environment variables take precedence. Keep `.env` out of version control and never commit real credentials. Restart the Django server after changing email settings. In **Settings**, enable email reminders; manually send due reminders from **Reminder Centre**. For automatic daily emails, also enable daily reminders and schedule this command once per day. On Windows, create a daily task in Task Scheduler with the Python executable as the program and the command arguments below; set the task's **Start in** value to the project directory:
